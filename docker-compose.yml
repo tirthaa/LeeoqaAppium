@@ -2,7 +2,7 @@ version: "3.8"
 services:
   Android-Service:
     image: android-emulator
-    build:    
+    build: .
     container_name: Android-Service
     ports:
       - "4725:4725"
