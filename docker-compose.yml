@@ -1,88 +1,20 @@
+# Note: It requires docker-compose 1.13.0
+#
+# Usage: docker-compose up -d
+version: "2.2"
+
 services:
-  selenium-hub4:
-    image: selenium/hub:latest
-    container_name: selenium-hub4
+  # Selenium hub
+  selenium_hub:
+    image: selenium/hub:3.14.0-curium
     ports:
-      - "4441:4441"
-      - "4442:4442"
-      - "4443:4443"
-      - "4444:4444"
+      - 4444:4444
 
-  chrome:
-    image: selenium/node-chrome:beta
-    shm_size: 2gb
-    depends_on:
-      - selenium-hub4
-    environment:
-      - SE_EVENT_BUS_HOST=selenium-hub4
-      - SE_EVENT_BUS_PUBLISH_PORT=4442
-      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
-      
-  chrome1:
-    image: selenium/node-chrome:beta
-    shm_size: 2gb
-    depends_on:
-      - selenium-hub4
-    environment:
-      - SE_EVENT_BUS_HOST=selenium-hub4
-      - SE_EVENT_BUS_PUBLISH_PORT=4442
-      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
-
-  chrome2:
-    image: selenium/node-chrome:beta
-    shm_size: 2gb
-    depends_on:
-      - selenium-hub4
-    environment:
-      - SE_EVENT_BUS_HOST=selenium-hub4
-      - SE_EVENT_BUS_PUBLISH_PORT=4442
-      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
-
-  chrome3:
-    image: selenium/node-chrome:beta
-    shm_size: 2gb
-    depends_on:
-      - selenium-hub4
-    environment:
-      - SE_EVENT_BUS_HOST=selenium-hub4
-      - SE_EVENT_BUS_PUBLISH_PORT=4442
-      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443      
-      
-  chrome4:
-    image: selenium/node-chrome:beta
-    shm_size: 2gb
-    depends_on:
-      - selenium-hub4
-    environment:
-      - SE_EVENT_BUS_HOST=selenium-hub4
-      - SE_EVENT_BUS_PUBLISH_PORT=4442
-      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
-
-  chrome5:
-    image: selenium/node-chrome:beta
-    shm_size: 2gb
-    depends_on:
-      - selenium-hub4
-    environment:
-      - SE_EVENT_BUS_HOST=selenium-hub4
-      - SE_EVENT_BUS_PUBLISH_PORT=4442
-      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
-
-  chrome6:
-    image: selenium/node-chrome:beta
-    shm_size: 2gb
-    depends_on:
-      - selenium-hub4
-    environment:
-      - SE_EVENT_BUS_HOST=selenium-hub4
-      - SE_EVENT_BUS_PUBLISH_PORT=4442
-      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
- 
- real_device:
+  real_device:
     image: appium/appium
     depends_on:
-      - selenium-hub4
-    network_mode: "service:selenium-hub4"
+      - selenium_hub
+    network_mode: "service:selenium_hub"
     privileged: true
     volumes:
       - /dev/bus/usb:/dev/bus/usb
@@ -90,7 +22,7 @@ services:
       - $PWD/example/sample_apk:/root/tmp
     environment:
       - CONNECT_TO_GRID=true
-      - SELENIUM_HOST=selenium-hub4
+      - SELENIUM_HOST=selenium_hub
       - RELAXED_SECURITY=true
 
   nexus_7.1.1:
@@ -98,7 +30,7 @@ services:
     privileged: true
     scale: 1
     depends_on:
-      - selenium-hub4
+      - selenium_hub
       - real_device
     ports:
       - 6080:6080
@@ -112,5 +44,5 @@ services:
       - DEVICE=Nexus 5
       - CONNECT_TO_GRID=true
       - APPIUM=true
-      - SELENIUM_HOST=selenium-hub4
+      - SELENIUM_HOST=selenium_hub
       - AUTO_RECORD=true
