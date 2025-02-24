@@ -1,48 +1,49 @@
-# Note: It requires docker-compose 1.13.0
-#
-# Usage: docker-compose up -d
-version: "2.2"
-
+version: "3.7"
 services:
-  # Selenium hub
-  selenium_hub:
-    image: selenium/hub:3.14.0-curium
+  front-envoy:
+    image: emulator_envoy:latest
+    container_name: emulator_envoy
+    networks:
+      - envoymesh
+    expose:
+      - "8080"
+      - "8001"
     ports:
-      - 4444:4444
+      - "80:8080"
+      - "443:8080"
+      - "8001:8001"
+      - "8080:8080"
+  emulator:
+    image: emulator_emulator:latest
+    container_name: emulator_emulator
+    networks:
+      envoymesh:
+        aliases:
+          - emulator
+    devices: [/dev/kvm]
+    shm_size: 128M
+    expose:
+      - "8554"
+  #jwt_signer:
+  #  image: emulator_jwt_signer:latest
+  #  container_name: emulator_jwt_signer
+  #  networks:
+  #    envoymesh:
+  #      aliases:
+  #        - jwt_signer
+  #  expose:
+  #    - "8080"
 
-  real_device:
-    image: appium/appium
-    depends_on:
-      - selenium_hub
-    network_mode: "service:selenium_hub"
-    privileged: true
-    volumes:
-      - /dev/bus/usb:/dev/bus/usb
-      - ~/.android:/root/.android
-      - $PWD/example/sample_apk:/root/tmp
-    environment:
-      - CONNECT_TO_GRID=true
-      - SELENIUM_HOST=selenium_hub
-      - RELAXED_SECURITY=true
+  nginx:
+    image: emulator_nginx:latest
+    # network_mode: "host"
+    container_name: emulator_nginx
+    networks:
+      envoymesh:
+        aliases:
+          - nginx
+    expose:
+      - "80"
 
-  nexus_7.1.1:
-    image: budtmo/docker-android-x86-7.1.1
-    privileged: true
-    scale: 1
-    depends_on:
-      - selenium_hub
-      - real_device
-    ports:
-      - 6080:6080
-      - 4723:4723
-      - 5554:5554
-      - 5555:5555
-    volumes:
-      - $PWD/example/sample_apk:/root/tmp/sample_apk
-      - ./video-nexus_7.1.1:/tmp/video
-    environment:
-      - DEVICE=Nexus 5
-      - CONNECT_TO_GRID=true
-      - APPIUM=true
-      - SELENIUM_HOST=selenium_hub
-      - AUTO_RECORD=true
+networks:
+  envoymesh: {}
