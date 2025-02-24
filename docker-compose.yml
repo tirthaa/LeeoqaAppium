@@ -10,6 +10,8 @@ services:
     ports:
       - 4444:4444
 
+      
+
   nexus_7.1.1:
     image: budtmo/docker-android-x86-7.1.1
     privileged: true
